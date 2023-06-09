@@ -54,9 +54,6 @@ export function useAppointments(): UseAppointments {
     queryClient.prefetchQuery(
       [queryKeys.appointments, newMonthYear.year, newMonthYear.month],
       () => getAppointments(newMonthYear.year, newMonthYear.month),
-      {
-        keepPreviousData: true,
-      },
     );
   }, [monthYear, queryClient]);
 
