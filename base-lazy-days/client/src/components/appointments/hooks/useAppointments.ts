@@ -1,12 +1,19 @@
 // @ts-nocheck
 import dayjs from 'dayjs';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 
 import { axiosInstance } from '../../../axiosInstance';
 import { queryKeys } from '../../../react-query/constants';
 import { useUser } from '../../user/hooks/useUser';
 import { AppointmentDateMap } from '../types';
+import { getAvailableAppointments } from '../utils';
 import { getMonthYearDetails, getNewMonthYear, MonthYear } from './monthYear';
 
 async function getAppointments(
@@ -46,6 +53,12 @@ export function useAppointments(): UseAppointments {
 
   const { user } = useUser();
 
+  const selectFn = useCallback((data) => {
+      getAvailableAppointments(data, user);
+    },
+    [user],
+  );
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -62,6 +75,9 @@ export function useAppointments(): UseAppointments {
   const { data: appointments = fallback } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
+    {
+      select: showAll ? undefined : selectFn,
+    },
   );
 
   return { appointments, monthYear, updateMonthYear, showAll, setShowAll };
